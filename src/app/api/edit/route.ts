@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { openai } from "@/lib/openai";
+import { getOpenAI } from "@/lib/openai";
 import { limit } from "@/lib/rate-limit";
 import { EditRequestSchema } from "@/lib/schemas";
 
@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
       maskFile = new File([maskBlob], 'mask.png', { type: 'image/png' });
     }
 
+    const openai = getOpenAI();
     const response = await openai.images.edit({
       image: imageFile,
       mask: maskFile,

@@ -1,9 +1,13 @@
 import OpenAI from "openai";
 
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error("OPENAI_API_KEY is not set");
-}
+// Only initialize if API key is available (for build time)
+export const openai = process.env.OPENAI_API_KEY 
+  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  : null;
 
-export const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY 
-});
+export function getOpenAI() {
+  if (!openai) {
+    throw new Error("OPENAI_API_KEY is not set");
+  }
+  return openai;
+}

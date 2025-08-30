@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { openai } from "@/lib/openai";
+import { getOpenAI } from "@/lib/openai";
 import { limit } from "@/lib/rate-limit";
 import { GenerateRequestSchema } from "@/lib/schemas";
 
@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { prompt, size, n } = GenerateRequestSchema.parse(body);
 
+    const openai = getOpenAI();
     const response = await openai.images.generate({
       model: "dall-e-3",
       prompt: `Create an ugly, distorted, cursed avatar: ${prompt}. Make it look intentionally bad with pixelation, color distortion, and weird artifacts.`,
