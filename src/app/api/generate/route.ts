@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
       response_format: "b64_json",
     });
 
-    const images = response.data?.map((image: { b64_json: string }) => image.b64_json) || [];
+    const images = response.data?.map((image) => image.b64_json).filter(Boolean) || [];
 
     return NextResponse.json({ 
       success: true, 
