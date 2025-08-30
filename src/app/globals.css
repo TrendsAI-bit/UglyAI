@@ -63,8 +63,16 @@
     border-color: hsl(var(--border));
   }
   body {
-    @apply bg-white text-black dark:bg-gray-900 dark:text-white;
+    background-color: white;
+    color: black;
     font-family: 'VT323', monospace;
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-color: #111827;
+      color: white;
+    }
   }
 }
 
