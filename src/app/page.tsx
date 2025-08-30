@@ -200,7 +200,7 @@ export default function LandingPage() {
             </div>
           </footer>
         </div>
-      </CRTFrame>
+      </div>
     </div>
   );
 }

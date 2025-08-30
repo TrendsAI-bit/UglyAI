@@ -63,7 +63,7 @@
     border-color: hsl(var(--border));
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-white text-black dark:bg-gray-900 dark:text-white;
     font-family: 'VT323', monospace;
   }
 }
