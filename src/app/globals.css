@@ -68,6 +68,15 @@
   }
 }
 
+/* CRT Theme Colors */
+:root {
+  --crt-green: 120 100% 25%;
+  --crt-amber: 45 100% 50%;
+  --crt-magenta: 300 100% 50%;
+  --crt-beige: 60 30% 85%;
+  --crt-dark: 0 0% 10%;
+}
+
 /* CRT Effects */
 .crt-frame {
   position: relative;
