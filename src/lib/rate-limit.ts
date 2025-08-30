@@ -14,7 +14,6 @@ export async function limit(req: Request, maxRequests = 10, windowMs = 60000): P
              'unknown';
   
   const now = Date.now();
-  const windowStart = now - windowMs;
   
   const entry = rateLimitStore.get(ip);
   

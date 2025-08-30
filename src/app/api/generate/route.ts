@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
   try {
     await limit(req);
     const body = await req.json();
-    const { prompt, size, n, seed } = GenerateRequestSchema.parse(body);
+    const { prompt, size, n } = GenerateRequestSchema.parse(body);
 
     const response = await openai.images.generate({
       model: "dall-e-3",
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
       response_format: "b64_json",
     });
 
-    const images = response.data?.map((image: any) => image.b64_json) || [];
+    const images = response.data?.map((image: { b64_json: string }) => image.b64_json) || [];
 
     return NextResponse.json({ 
       success: true, 
@@ -26,10 +26,10 @@ export async function POST(req: NextRequest) {
       prompt: response.data?.[0]?.revised_prompt || prompt 
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Generation error:", error);
     
-    if (error.message === "Rate limit exceeded") {
+    if (error instanceof Error && error.message === "Rate limit exceeded") {
       return NextResponse.json(
         { error: "Rate limit exceeded. Please try again later." },
         { status: 429 }

@@ -12,7 +12,7 @@ import { FilterSettings } from '@/lib/schemas';
 import { PRESETS } from '@/lib/presets';
 import { blobToDataURL, stripEXIF } from '@/lib/image';
 import { toast } from 'sonner';
-import { Sparkles, Wand2, Upload } from 'lucide-react';
+import { Sparkles, Wand2 } from 'lucide-react';
 
 export default function StudioPage() {
   const [engine, setEngine] = useState<'ai' | 'filter'>('ai');
@@ -60,8 +60,9 @@ export default function StudioPage() {
 
       setGeneratedImages(data.images);
       toast.success('AI images generated!');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to generate images');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate images';
+      toast.error(errorMessage);
       console.error('Generation error:', error);
     } finally {
       setIsGenerating(false);
@@ -110,7 +111,7 @@ export default function StudioPage() {
     toast.success('Made it uglier!');
   }, [settings, generatedImages]);
 
-  const handleReUglify = useCallback((index: number) => {
+  const handleReUglify = useCallback((_index: number) => {
     if (engine === 'filter' && uploadedImage) {
       // Re-apply filter to the uploaded image
       setIsGenerating(true);
@@ -144,8 +145,9 @@ export default function StudioPage() {
       newImages[index] = `data:image/png;base64,${data.image}`;
       setGeneratedImages(newImages);
       toast.success('Variation created!');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to create variation');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create variation';
+      toast.error(errorMessage);
       console.error('Variation error:', error);
     } finally {
       setIsGenerating(false);

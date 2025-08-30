@@ -22,7 +22,7 @@ export function PreviewGrid({
     downloadImage(imageDataURL, filename);
   };
 
-  const handleShare = async (imageDataURL: string) => {
+  const _handleShare = async (imageDataURL: string) => {
     try {
       const blob = await fetch(imageDataURL).then(r => r.blob());
       const file = new File([blob], 'ugly-avatar.png', { type: 'image/png' });

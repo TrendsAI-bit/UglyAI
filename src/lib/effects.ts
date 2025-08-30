@@ -103,7 +103,6 @@ export class UglyEffects {
   // Chromatic aberration
   aberration(offset: number): void {
     const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-    const data = imageData.data;
     const width = this.canvas.width;
     const height = this.canvas.height;
     
@@ -126,7 +125,7 @@ export class UglyEffects {
 
   // JPEG mush effect
   jpegMush(strength: number): void {
-    let currentCanvas = this.canvas;
+    const currentCanvas = this.canvas;
     
     for (let i = 0; i < strength; i++) {
       const quality = Math.max(0.1, 0.5 - (i * 0.1));

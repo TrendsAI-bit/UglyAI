@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { CRTFrame } from '@/components/crt-frame';
-import { Sparkles, Wand2, Download, Share2 } from 'lucide-react';
+import { Sparkles, Wand2, Download } from 'lucide-react';
 
 export default function LandingPage() {
   return (
@@ -43,7 +43,7 @@ export default function LandingPage() {
                 AI Generation
               </h3>
               <p className="text-hsl(var(--crt-beige))">
-                Generate cursed avatars from text prompts using OpenAI's latest models
+                Generate cursed avatars from text prompts using OpenAI&apos;s latest models
               </p>
             </div>
 
@@ -133,7 +133,7 @@ export default function LandingPage() {
           {/* Footer */}
           <footer className="mt-16 pt-8 border-t border-hsl(var(--crt-green) / 0.3) text-center">
             <p className="text-sm text-hsl(var(--crt-beige) / 0.7) mb-4">
-              Inspired by community projects like 'Ugly Avatar' (non-commercial license noted). 
+              Inspired by community projects like &apos;Ugly Avatar&apos; (non-commercial license noted). 
               Effects re-implemented from scratch.
             </p>
             <div className="flex justify-center space-x-4 text-xs text-hsl(var(--crt-beige) / 0.5)">

@@ -36,10 +36,10 @@ export async function POST(req: NextRequest) {
       prompt: response.data?.[0]?.revised_prompt || prompt 
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Edit error:", error);
     
-    if (error.message === "Rate limit exceeded") {
+    if (error instanceof Error && error.message === "Rate limit exceeded") {
       return NextResponse.json(
         { error: "Rate limit exceeded. Please try again later." },
         { status: 429 }

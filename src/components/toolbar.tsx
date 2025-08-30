@@ -26,7 +26,7 @@ export function Toolbar({
   onMakeUglier,
   isGenerating
 }: ToolbarProps) {
-  const updateSetting = (key: keyof FilterSettings, value: any) => {
+  const updateSetting = (key: keyof FilterSettings, value: unknown) => {
     onSettingsChange({ ...settings, [key]: value });
   };
 
