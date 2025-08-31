@@ -226,15 +226,17 @@ export default function StudioPage() {
         </button>
       </div>
 
-      {/* Simple Link */}
+      {/* Prominent Classic Version Link */}
       <div className="text-center">
         <a 
           href="https://txstc55.github.io/ugly-avatar/" 
           target="_blank" 
           rel="noopener noreferrer"
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
         >
-          Classic Version →
+          <span className="mr-2">⚡</span>
+          Classic Version
+          <span className="ml-2">→</span>
         </a>
       </div>
 
