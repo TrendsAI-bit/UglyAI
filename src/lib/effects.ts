@@ -4,10 +4,30 @@ import { FilterSettings } from "./schemas";
 export class UglyEffects {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
+  private imageData: ImageData | null = null;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
-    this.ctx = canvas.getContext('2d')!;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) {
+      throw new Error('Failed to get canvas context');
+    }
+    this.ctx = ctx;
+  }
+
+  // Get image data once and cache it
+  private getImageData(): ImageData {
+    if (!this.imageData) {
+      this.imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+    }
+    return this.imageData;
+  }
+
+  // Put image data back to canvas
+  private putImageData(): void {
+    if (this.imageData) {
+      this.ctx.putImageData(this.imageData, 0, 0);
+    }
   }
 
   // Pixelate effect
@@ -23,11 +43,14 @@ export class UglyEffects {
     this.ctx.imageSmoothingEnabled = false;
     this.ctx.drawImage(tempCanvas, 0, 0, this.canvas.width, this.canvas.height);
     this.ctx.imageSmoothingEnabled = true;
+    
+    // Reset cached image data
+    this.imageData = null;
   }
 
   // Posterize effect
   posterize(levels: number): void {
-    const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+    const imageData = this.getImageData();
     const data = imageData.data;
     
     for (let i = 0; i < data.length; i += 4) {
@@ -36,12 +59,12 @@ export class UglyEffects {
       data[i + 2] = Math.floor(data[i + 2] / 255 * levels) * (255 / levels); // B
     }
     
-    this.ctx.putImageData(imageData, 0, 0);
+    this.putImageData();
   }
 
   // Floyd-Steinberg dithering
   dither(): void {
-    const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+    const imageData = this.getImageData();
     const data = imageData.data;
     const width = this.canvas.width;
     const height = this.canvas.height;
@@ -97,12 +120,12 @@ export class UglyEffects {
       }
     }
     
-    this.ctx.putImageData(imageData, 0, 0);
+    this.putImageData();
   }
 
   // Chromatic aberration
   aberration(offset: number): void {
-    const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+    const imageData = this.getImageData();
     const width = this.canvas.width;
     const height = this.canvas.height;
     
@@ -121,6 +144,9 @@ export class UglyEffects {
     this.ctx.drawImage(tempCanvas, -offset, 0);
     
     this.ctx.globalCompositeOperation = 'source-over';
+    
+    // Reset cached image data
+    this.imageData = null;
   }
 
   // JPEG mush effect
@@ -135,6 +161,8 @@ export class UglyEffects {
       img.onload = () => {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.drawImage(img, 0, 0);
+        // Reset cached image data
+        this.imageData = null;
       };
       img.src = dataURL;
     }
@@ -142,7 +170,7 @@ export class UglyEffects {
 
   // Noise effect
   noise(amount: number): void {
-    const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+    const imageData = this.getImageData();
     const data = imageData.data;
     
     for (let i = 0; i < data.length; i += 4) {
@@ -152,7 +180,7 @@ export class UglyEffects {
       data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + noise)); // B
     }
     
-    this.ctx.putImageData(imageData, 0, 0);
+    this.putImageData();
   }
 
   // Vignette effect
@@ -169,6 +197,9 @@ export class UglyEffects {
     this.ctx.fillStyle = gradient;
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.globalCompositeOperation = 'source-over';
+    
+    // Reset cached image data
+    this.imageData = null;
   }
 
   // Sticker effect
@@ -192,40 +223,48 @@ export class UglyEffects {
       this.ctx.fillText(sticker, 0, 0);
       this.ctx.restore();
     }
+    
+    // Reset cached image data
+    this.imageData = null;
   }
 
   // Apply all effects based on settings
   applyEffects(settings: FilterSettings): void {
-    if (settings.pixelSize > 1) {
-      this.pixelate(settings.pixelSize);
-    }
-    
-    if (settings.posterizeLevels > 2) {
-      this.posterize(settings.posterizeLevels);
-    }
-    
-    if (settings.dither) {
-      this.dither();
-    }
-    
-    if (settings.aberration > 0) {
-      this.aberration(settings.aberration);
-    }
-    
-    if (settings.jpegMush > 0) {
-      this.jpegMush(settings.jpegMush);
-    }
-    
-    if (settings.noise > 0) {
-      this.noise(settings.noise);
-    }
-    
-    if (settings.vignette > 0) {
-      this.vignette(settings.vignette);
-    }
-    
-    if (settings.stickers) {
-      this.stickers();
+    try {
+      if (settings.pixelSize > 1) {
+        this.pixelate(settings.pixelSize);
+      }
+      
+      if (settings.posterizeLevels > 2) {
+        this.posterize(settings.posterizeLevels);
+      }
+      
+      if (settings.dither) {
+        this.dither();
+      }
+      
+      if (settings.aberration > 0) {
+        this.aberration(settings.aberration);
+      }
+      
+      if (settings.jpegMush > 0) {
+        this.jpegMush(settings.jpegMush);
+      }
+      
+      if (settings.noise > 0) {
+        this.noise(settings.noise);
+      }
+      
+      if (settings.vignette > 0) {
+        this.vignette(settings.vignette);
+      }
+      
+      if (settings.stickers) {
+        this.stickers();
+      }
+    } catch (error) {
+      console.error('Error applying effects:', error);
+      throw error;
     }
   }
 }
