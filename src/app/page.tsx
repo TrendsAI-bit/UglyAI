@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 
 const ASSETS = [
@@ -44,30 +43,43 @@ export default function LandingPage() {
         </Link>
       </div>
 
-      {/* Simple Asset Showcase */}
-      <div>
-        <h2 className="h-pixel text-2xl font-bold text-center mb-6">
-          Get inspired by these faces
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {ASSETS.map((asset) => (
-            <div key={asset.name} className="text-center">
-              <div className="panel">
-                <div className="relative w-full aspect-square mb-3">
-                  <Image
-                    src={asset.path}
-                    alt={asset.name}
-                    fill
-                    className="object-contain rounded"
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                  />
-                </div>
-                <h4 className="h-pixel text-sm font-bold">
-                  {asset.name}
-                </h4>
-              </div>
+      {/* Asset Showcase */}
+      <div className="text-center">
+        <h2 className="text-2xl font-bold mb-6">Asset Collection</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
+          {ASSETS.map((asset, index) => (
+            <div key={index} className="aspect-square rounded-lg border overflow-hidden">
+              <img
+                src={asset.path}
+                alt={asset.name}
+                className="w-full h-full object-cover"
+              />
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Original Project Reference */}
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 max-w-2xl mx-auto">
+        <div className="text-center">
+          <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-3">
+            <span className="text-blue-600 dark:text-blue-400 text-xl">⚡</span>
+          </div>
+          <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
+            Inspired by the Original
+          </h3>
+          <p className="text-blue-700 dark:text-blue-300 mb-4">
+            This project is inspired by the amazing original Ugly Avatar generator by txstc55. 
+            Check out their classic implementation for the full experience!
+          </p>
+          <a 
+            href="https://txstc55.github.io/ugly-avatar/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+          >
+            Visit Original Project →
+          </a>
         </div>
       </div>
 
