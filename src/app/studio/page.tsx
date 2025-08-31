@@ -57,13 +57,17 @@ export default function StudioPage() {
       const data = await response.json();
       
       console.log('API Response:', data); // Debug log
+      console.log('Response status:', response.status); // Debug log
       
       if (!response.ok) {
+        console.error('API Error:', data); // Debug log
         throw new Error(data.error || 'Failed to generate ugly image');
       }
 
       if (data.images && data.images.length > 0) {
-        setProcessedImage(`data:image/png;base64,${data.images[0]}`);
+        const imageDataUrl = `data:image/png;base64,${data.images[0]}`;
+        console.log('Setting image:', imageDataUrl.substring(0, 100) + '...'); // Debug log
+        setProcessedImage(imageDataUrl);
         toast.success('AI generated an ugly image!');
       } else {
         console.log('No images in response:', data); // Debug log
