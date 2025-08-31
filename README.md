@@ -6,6 +6,7 @@ A fun, fast, retro PFP factory that creates intentionally awful, pixelated, and 
 
 - **AI Engine**: Generate cursed avatars from text prompts using OpenAI's DALL-E 3
 - **Filter Engine**: Apply retro effects like pixelation, dithering, and chromatic aberration
+- **Asset Gallery**: Built-in collection of cartoon face assets to start with
 - **Retro CRT Theme**: Authentic scanlines, noise effects, and vintage color palette
 - **Instant Download**: Download creations as high-quality PNG files
 - **Privacy-Friendly**: No persistent storage by default
@@ -40,11 +41,7 @@ npm install
 ```
 
 3. Set up environment variables:
-```bash
-cp .env.example .env.local
-```
-
-Edit `.env.local` and add your OpenAI API key:
+Create a `.env.local` file in the root directory and add:
 ```
 OPENAI_API_KEY=your_openai_api_key_here
 ```
@@ -58,6 +55,12 @@ npm run dev
 
 ## Usage
 
+### Asset Gallery
+1. Click "Show Asset Gallery" in the studio
+2. Choose from our collection of cartoon faces
+3. Apply filters to make them ugly
+4. Download your creation
+
 ### AI Generation
 1. Switch to "AI" engine in the toolbar
 2. Enter a descriptive prompt (e.g., "corporate mugshot with cursed energy")
@@ -66,7 +69,7 @@ npm run dev
 
 ### Filter Engine
 1. Switch to "Filter" engine in the toolbar
-2. Upload an image (drag & drop or click to browse)
+2. Upload an image (drag & drop or click to browse) or select from assets
 3. Choose from preset effects or adjust sliders manually
 4. Click "Uglify Image"
 5. Download the result
@@ -126,6 +129,16 @@ The filter engine includes these effects:
 - **Vignette**: Radial darkening
 - **Stickers**: Random emoji overlays
 
+## Asset Collection
+
+The app includes a built-in collection of cartoon face assets:
+- **Sad Face**: Dark messy hair, sad expression
+- **Surprised Face**: Red spiky hair, shocked expression  
+- **Disappointed Face**: Light brown hair, disappointed look
+- **Original Face**: Classic cartoon face
+
+All assets are 500x500 PNG files with transparent backgrounds, perfect for applying ugly filters.
+
 ## Deployment
 
 ### Vercel (Recommended)
@@ -152,6 +165,20 @@ The app includes built-in rate limiting:
 - All processing happens in memory
 - EXIF data is stripped from uploaded images
 - Optional toggle for "Keep nothing (stateless)" mode
+
+## Troubleshooting
+
+### API Issues
+- Make sure your `OPENAI_API_KEY` is set correctly
+- Check that your OpenAI account has billing enabled
+- Ensure your prompt is under 1000 characters
+- Verify your image size is under 20MB for edit operations
+
+### Common Errors
+- **414 URI Too Long**: Prompt or image data too large
+- **429 Rate Limit**: Too many requests, wait and try again
+- **402 Billing**: OpenAI account needs billing setup
+- **400 Content Policy**: Prompt violates OpenAI's content policy
 
 ## Contributing
 

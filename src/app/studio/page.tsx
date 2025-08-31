@@ -6,13 +6,14 @@ import { Toolbar } from '@/components/toolbar';
 import { Dropzone } from '@/components/dropzone';
 import { UglyCanvas } from '@/components/ugly-canvas';
 import { PreviewGrid } from '@/components/preview-grid';
+import { AssetGallery } from '@/components/asset-gallery';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FilterSettings } from '@/lib/schemas';
 import { PRESETS } from '@/lib/presets';
 import { blobToDataURL, stripEXIF } from '@/lib/image';
 import { toast } from 'sonner';
-import { Sparkles, Wand2 } from 'lucide-react';
+import { Sparkles, Wand2, Image as ImageIcon, Download } from 'lucide-react';
 
 export default function StudioPage() {
   const [engine, setEngine] = useState<'ai' | 'filter'>('ai');
@@ -21,6 +22,7 @@ export default function StudioPage() {
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [settings, setSettings] = useState<FilterSettings>(PRESETS['Cursed Cartoon']);
+  const [showAssetGallery, setShowAssetGallery] = useState(false);
 
   const handleFileSelect = useCallback(async (file: File) => {
     try {
@@ -32,6 +34,13 @@ export default function StudioPage() {
       toast.error('Failed to upload image');
       console.error('Upload error:', error);
     }
+  }, []);
+
+  const handleAssetSelect = useCallback((assetPath: string) => {
+    setUploadedImage(assetPath);
+    setEngine('filter');
+    setShowAssetGallery(false);
+    toast.success('Asset selected! Now apply filters to make it ugly.');
   }, []);
 
   const generateAIImages = useCallback(async () => {
@@ -111,7 +120,7 @@ export default function StudioPage() {
     toast.success('Made it uglier!');
   }, [settings, generatedImages]);
 
-  const handleReUglify = useCallback((_index: number) => {
+  const handleReUglify = useCallback(() => {
     if (engine === 'filter' && uploadedImage) {
       // Re-apply filter to the uploaded image
       setIsGenerating(true);
@@ -154,6 +163,16 @@ export default function StudioPage() {
     }
   }, [generatedImages]);
 
+  const downloadImage = useCallback((imageData: string, index: number) => {
+    const link = document.createElement('a');
+    link.href = imageData;
+    link.download = `ugly-avatar-${index + 1}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Image downloaded!');
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-hsl(var(--crt-dark)) to-hsl(var(--crt-dark) / 0.8) p-4">
       <CRTFrame className="max-w-7xl mx-auto">
@@ -161,6 +180,25 @@ export default function StudioPage() {
           <h1 className="pixel-text text-4xl font-bold text-center mb-8 text-hsl(var(--crt-green))">
             UGLY AI STUDIO
           </h1>
+          
+          {/* Asset Gallery Toggle */}
+          <div className="text-center mb-6">
+            <Button
+              onClick={() => setShowAssetGallery(!showAssetGallery)}
+              className="btn-ugly"
+              variant="outline"
+            >
+              <ImageIcon className="w-4 h-4 mr-2" />
+              {showAssetGallery ? 'Hide' : 'Show'} Asset Gallery
+            </Button>
+          </div>
+
+          {/* Asset Gallery */}
+          {showAssetGallery && (
+            <div className="mb-8">
+              <AssetGallery onAssetSelect={handleAssetSelect} />
+            </div>
+          )}
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Panel - Controls */}
@@ -221,6 +259,32 @@ export default function StudioPage() {
                       </Button>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Quick Actions */}
+              {generatedImages.length > 0 && (
+                <div className="space-y-4 p-6 bg-hsl(var(--crt-beige) / 0.1) rounded-lg border border-hsl(var(--crt-green))">
+                  <h3 className="pixel-text text-lg font-bold">Quick Actions:</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      onClick={() => downloadImage(generatedImages[0], 0)}
+                      className="btn-ugly text-sm"
+                      size="sm"
+                    >
+                      <Download className="w-3 h-3 mr-1" />
+                      Download
+                    </Button>
+                    <Button
+                      onClick={() => handleMakeVariation(0)}
+                      className="btn-ugly text-sm"
+                      size="sm"
+                      disabled={isGenerating}
+                    >
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      Variation
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>

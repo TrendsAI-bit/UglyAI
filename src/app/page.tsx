@@ -1,6 +1,30 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Wand2, Download } from 'lucide-react';
+import { Sparkles, Wand2, Download, Image as ImageIcon } from 'lucide-react';
+
+const ASSETS = [
+  {
+    name: 'Sad Face',
+    path: '/assets/face (1).png',
+    description: 'Dark messy hair, sad expression'
+  },
+  {
+    name: 'Surprised Face', 
+    path: '/assets/face (2).png',
+    description: 'Red spiky hair, shocked expression'
+  },
+  {
+    name: 'Disappointed Face',
+    path: '/assets/face (3).png', 
+    description: 'Light brown hair, disappointed look'
+  },
+  {
+    name: 'Original Face',
+    path: '/assets/face.png',
+    description: 'Classic cartoon face'
+  }
+];
 
 export default function LandingPage() {
   return (
@@ -45,6 +69,49 @@ export default function LandingPage() {
                 <Wand2 className="w-5 h-5 mr-2" />
                 View Gallery
               </Button>
+            </div>
+          </div>
+
+          {/* Asset Showcase */}
+          <div className="mb-16 relative z-10">
+            <h2 className="font-pixel text-3xl font-bold text-center mb-8 text-yellow-400">
+              Cartoon Face Assets
+            </h2>
+            <div className="bg-gray-900 border-2 border-green-500 rounded-lg p-8 mb-8">
+              <p className="text-center text-gray-200 mb-6">
+                Start with our collection of cartoon faces and make them ugly!
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {ASSETS.map((asset) => (
+                  <div key={asset.name} className="text-center group">
+                    <div className="relative bg-gray-800 rounded-lg border-2 border-green-500 p-4 transform hover:scale-105 transition-all duration-300 hover:border-pink-500">
+                      <div className="relative w-full aspect-square mb-3">
+                        <Image
+                          src={asset.path}
+                          alt={asset.name}
+                          fill
+                          className="object-contain rounded"
+                          sizes="(max-width: 768px) 50vw, 25vw"
+                        />
+                      </div>
+                      <h4 className="font-pixel text-sm font-bold text-green-500 mb-1">
+                        {asset.name}
+                      </h4>
+                      <p className="text-xs text-gray-400">
+                        {asset.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="text-center mt-6">
+                <Link href="/studio">
+                  <Button className="bg-gradient-to-r from-pink-500 to-yellow-500 text-white border-2 border-green-500">
+                    <ImageIcon className="w-4 h-4 mr-2" />
+                    Use These Assets
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
 
