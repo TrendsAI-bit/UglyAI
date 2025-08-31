@@ -69,7 +69,7 @@ export default function StudioPage() {
         const imageDataUrl = `data:image/png;base64,${data.images[0]}`;
         console.log('Setting image:', imageDataUrl.substring(0, 100) + '...'); // Debug log
         setProcessedImage(imageDataUrl);
-        toast.success('AI generated an ugly version of your image!');
+        toast.success('AI generated an ugly version based on your image!');
       } else {
         console.log('No images in response:', data); // Debug log
         throw new Error('No image was generated');
@@ -168,12 +168,12 @@ export default function StudioPage() {
               {isProcessing ? (
                 <>
                   <Sparkles className="w-4 h-4 mr-2 animate-spin" />
-                  Making it ugly...
+                  Creating ugly version...
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Make My Image Ugly with AI
+                  Generate Ugly Version with AI
                 </>
               )}
             </Button>

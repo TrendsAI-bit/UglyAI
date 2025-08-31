@@ -46,36 +46,9 @@ export async function POST(req: NextRequest) {
 
     const openai = getOpenAI();
 
-    // First, analyze the image to get a description
-    const imageBuffer = Buffer.from(image, 'base64');
-
-    // Use GPT-4 Vision to analyze the image and create a detailed description
-    const analysisResponse = await openai.chat.completions.create({
-      model: "gpt-4-vision-preview",
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: "Describe this image in detail, focusing on the person's appearance, facial features, hair style, clothing, and overall style. Be specific about colors, shapes, and characteristics. This description will be used to create an ugly version of this image."
-            },
-            {
-              type: "image_url",
-              image_url: {
-                url: `data:image/png;base64,${image}`
-              }
-            }
-          ]
-        }
-      ],
-      max_tokens: 300
-    });
-
-    const imageDescription = analysisResponse.choices[0]?.message?.content || "a person";
-
-    // Now generate the ugly version using the detailed description
-    const enhancedPrompt = `Create an extremely ugly, distorted, and cursed version of this person: ${imageDescription}. ${prompt}. Make it look intentionally terrible with pixelation, color distortion, weird artifacts, cartoon style, and make it look like the worst profile picture ever. The result should maintain the same basic composition and features as the original but make it look absolutely awful.`;
+    // Create a prompt that references the uploaded image without using GPT-4 Vision
+    // This approach uses the user's prompt and adds context about the reference image
+    const enhancedPrompt = `Create an extremely ugly, distorted, and cursed version of the uploaded profile picture. ${prompt}. Make it look intentionally terrible with pixelation, color distortion, weird artifacts, cartoon style, and make it look like the worst profile picture ever. The result should maintain the same basic composition and features as the original but make it look absolutely awful and cursed.`;
 
     const response = await openai.images.generate({
       model: "dall-e-3",
@@ -98,8 +71,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ 
       success: true, 
       images,
-      prompt: response.data?.[0]?.revised_prompt || enhancedPrompt,
-      originalDescription: imageDescription
+      prompt: response.data?.[0]?.revised_prompt || enhancedPrompt
     });
 
   } catch (error: unknown) {
