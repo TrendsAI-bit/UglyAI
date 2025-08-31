@@ -1,10 +1,16 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Download, Upload, Sparkles } from 'lucide-react';
+import { Download, Upload, Sparkles, Zap } from 'lucide-react';
+import { UglyEffects } from '@/lib/effects';
+import { PRESETS, PRESET_NAMES } from '@/lib/presets';
+import { FilterSettings } from '@/lib/schemas';
 
 const ASSETS = [
   '/assets/face (1).png',
@@ -18,13 +24,33 @@ export default function StudioPage() {
   const [processedImage, setProcessedImage] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [prompt, setPrompt] = useState('');
+  const [activeTab, setActiveTab] = useState<'ai' | 'local'>('ai');
+  
+  // Local filter settings
+  const [filterSettings, setFilterSettings] = useState<FilterSettings>({
+    pixelSize: 16,
+    posterizeLevels: 3,
+    aberration: 4,
+    dither: true,
+    jpegMush: 2,
+    noise: 25,
+    vignette: 0.3,
+    stickers: true,
+  });
+
+  // Debug effect to monitor processed image changes
+  useEffect(() => {
+    console.log('Processed image changed:', processedImage ? 'Has image' : 'No image');
+  }, [processedImage]);
 
   const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setSelectedImage(e.target?.result as string);
+        const result = e.target?.result as string;
+        setSelectedImage(result);
+        setProcessedImage(''); // Clear previous result
       };
       reader.readAsDataURL(file);
     }
@@ -32,8 +58,10 @@ export default function StudioPage() {
 
   const handleAssetSelect = useCallback((assetPath: string) => {
     setSelectedImage(assetPath);
+    setProcessedImage(''); // Clear previous result
   }, []);
 
+  // AI Generation
   const generateUglyImage = useCallback(async () => {
     if (!selectedImage) {
       toast.error('Please select an image first');
@@ -50,7 +78,7 @@ export default function StudioPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           image: base64Image,
-                      prompt: prompt || 'Transform this image into an ugly, distorted, and cursed version while keeping the same style and composition. Add pixelation, color distortion, and make it look intentionally terrible.',
+          prompt: prompt || 'Transform this image into an ugly, distorted, and cursed version while keeping the same style and composition. Add pixelation, color distortion, and make it look intentionally terrible.',
           size: '1024x1024'
         }),
       });
@@ -83,126 +111,349 @@ export default function StudioPage() {
     }
   }, [selectedImage, prompt]);
 
+  // Local Filter Generation
+  const generateLocalUglyImage = useCallback(async () => {
+    if (!selectedImage) {
+      toast.error('Please select an image first');
+      return;
+    }
+
+    setIsProcessing(true);
+    
+    try {
+      // Create a canvas element
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      
+      if (!ctx) {
+        throw new Error('Failed to get canvas context');
+      }
+
+      // Load the image
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      
+      img.onload = () => {
+        try {
+          // Set canvas size
+          canvas.width = 512;
+          canvas.height = 512;
+          
+          // Draw and square crop the image
+          const size = Math.min(img.width, img.height);
+          const offsetX = (img.width - size) / 2;
+          const offsetY = (img.height - size) / 2;
+          
+          ctx.drawImage(img, offsetX, offsetY, size, size, 0, 0, 512, 512);
+          
+          // Apply ugly effects
+          const effects = new UglyEffects(canvas);
+          effects.applyEffects(filterSettings);
+          
+          // Get the processed image
+          const processedDataURL = canvas.toDataURL('image/png');
+          setProcessedImage(processedDataURL);
+          toast.success('Local filter applied successfully!');
+        } catch (error) {
+          console.error('Error processing image:', error);
+          toast.error('Failed to process image');
+        } finally {
+          setIsProcessing(false);
+        }
+      };
+      
+      img.onerror = () => {
+        console.error('Failed to load image');
+        toast.error('Failed to load image');
+        setIsProcessing(false);
+      };
+      
+      img.src = selectedImage;
+    } catch (error) {
+      console.error('Error in local processing:', error);
+      toast.error('Failed to process image');
+      setIsProcessing(false);
+    }
+  }, [selectedImage, filterSettings]);
+
   const downloadImage = useCallback(() => {
     if (processedImage) {
       const link = document.createElement('a');
-      link.href = processedImage;
       link.download = 'ugly-avatar.png';
+      link.href = processedImage;
       link.click();
-      toast.success('Image downloaded!');
     }
   }, [processedImage]);
 
+  const applyPreset = useCallback((presetName: string) => {
+    const preset = PRESETS[presetName];
+    if (preset) {
+      setFilterSettings(preset);
+      toast.success(`Applied ${presetName} preset`);
+    }
+  }, []);
+
   return (
-    <div className="space-y-6">
-      <h1 className="h-pixel text-3xl font-bold text-center">
-        UGLY STUDIO
-      </h1>
-
-      {/* Asset Selection */}
-      <div>
-        <h2 className="h-pixel text-xl font-bold mb-4">Choose a face to start with:</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          {ASSETS.map((asset, index) => (
-            <div
-              key={index}
-              className="panel cursor-pointer hover:ring-crt transition-all"
-              onClick={() => handleAssetSelect(asset)}
-            >
-              <img
-                src={asset}
-                alt={`Face ${index + 1}`}
-                className="w-full h-32 object-contain rounded"
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* File Upload */}
-        <div className="panel">
-          <h3 className="h-pixel text-lg font-bold mb-4">Or upload your own image:</h3>
-          <div className="flex items-center gap-4">
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={handleFileUpload}
-              className="input-retro"
-            />
-            <Upload className="w-5 h-5" />
-          </div>
-        </div>
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold mb-2">Ugly Avatar Studio</h1>
+        <p className="text-muted-foreground">Create intentionally awful profile pictures</p>
       </div>
 
-      {/* Image Preview and AI Generation */}
-      {selectedImage && (
-        <div className="panel">
-          <h3 className="h-pixel text-lg font-bold mb-4">Selected Image:</h3>
-          <div className="flex justify-center mb-4">
-            <img
-              src={selectedImage}
-              alt="Selected"
-              className="w-64 h-64 object-contain rounded border border-current"
-            />
-          </div>
-          
-          {/* AI Prompt Input */}
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                AI Prompt (optional)
-              </label>
-              <Input
-                type="text"
-                placeholder="Describe how to make it ugly while keeping the same style..."
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                className="w-full"
-              />
-            </div>
-            
-            <Button 
-              onClick={generateUglyImage} 
-              disabled={!selectedImage || isProcessing}
-              className="w-full"
-            >
-              {isProcessing ? (
-                <>
-                  <Sparkles className="w-4 h-4 mr-2 animate-spin" />
-                  Creating ugly version...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Generate Ugly Version with AI
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
-      )}
+      {/* Tab Navigation */}
+      <div className="flex space-x-1 bg-muted p-1 rounded-lg">
+        <button
+          onClick={() => setActiveTab('ai')}
+          className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'ai' 
+              ? 'bg-background text-foreground shadow-sm' 
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Sparkles className="w-4 h-4 mr-2 inline" />
+          AI Generation
+        </button>
+        <button
+          onClick={() => setActiveTab('local')}
+          className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'local' 
+              ? 'bg-background text-foreground shadow-sm' 
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Zap className="w-4 h-4 mr-2 inline" />
+          Local Filters (Fast)
+        </button>
+      </div>
 
-      {/* Processed Image */}
-      {processedImage && (
-        <div className="panel">
-          <h3 className="h-pixel text-lg font-bold mb-4">Your AI-Generated Ugly Creation:</h3>
-          <div className="flex justify-center">
-            <img
-              src={processedImage}
-              alt="Processed"
-              className="w-64 h-64 object-contain rounded border border-current"
-            />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left Column - Image Selection */}
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Upload Image</label>
+            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+              <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="hidden"
+                id="file-upload"
+              />
+              <label htmlFor="file-upload" className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
+                Click to upload or drag and drop
+              </label>
+            </div>
           </div>
-          <div className="mt-4 text-center">
-            <Button
-              onClick={downloadImage}
-              className="btn-retro"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Download
-            </Button>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Or Choose from Assets</label>
+            <div className="grid grid-cols-2 gap-2">
+              {ASSETS.map((asset, index) => (
+                <div
+                  key={index}
+                  onClick={() => handleAssetSelect(asset)}
+                  className="relative aspect-square cursor-pointer rounded-lg border-2 border-muted-foreground/25 hover:border-foreground transition-colors overflow-hidden"
+                >
+                  <img
+                    src={asset}
+                    alt={`Asset ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
+
+          {selectedImage && (
+            <div>
+              <label className="block text-sm font-medium mb-2">Selected Image</label>
+              <div className="relative aspect-square rounded-lg border overflow-hidden">
+                <img
+                  src={selectedImage}
+                  alt="Selected"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Right Column - Processing */}
+        <div className="space-y-4">
+          {activeTab === 'ai' ? (
+            /* AI Generation Tab */
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  AI Prompt (optional)
+                </label>
+                <Input
+                  type="text"
+                  placeholder="Describe how to make it ugly while keeping the same style..."
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+              
+              <Button 
+                onClick={generateUglyImage} 
+                disabled={!selectedImage || isProcessing}
+                className="w-full"
+              >
+                {isProcessing ? (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2 animate-spin" />
+                    Creating ugly version...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Generate Ugly Version with AI
+                  </>
+                )}
+              </Button>
+            </div>
+          ) : (
+            /* Local Filters Tab */
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Quick Presets</label>
+                <Select onValueChange={applyPreset}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a preset..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PRESET_NAMES.map((preset) => (
+                      <SelectItem key={preset} value={preset}>
+                        {preset}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Pixel Size: {filterSettings.pixelSize}</label>
+                  <Slider
+                    value={[filterSettings.pixelSize]}
+                    onValueChange={([value]) => setFilterSettings(prev => ({ ...prev, pixelSize: value }))}
+                    max={50}
+                    min={1}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Posterize Levels: {filterSettings.posterizeLevels}</label>
+                  <Slider
+                    value={[filterSettings.posterizeLevels]}
+                    onValueChange={([value]) => setFilterSettings(prev => ({ ...prev, posterizeLevels: value }))}
+                    max={8}
+                    min={2}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Chromatic Aberration: {filterSettings.aberration}</label>
+                  <Slider
+                    value={[filterSettings.aberration]}
+                    onValueChange={([value]) => setFilterSettings(prev => ({ ...prev, aberration: value }))}
+                    max={10}
+                    min={0}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Noise: {filterSettings.noise}</label>
+                  <Slider
+                    value={[filterSettings.noise]}
+                    onValueChange={([value]) => setFilterSettings(prev => ({ ...prev, noise: value }))}
+                    max={50}
+                    min={0}
+                    step={5}
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Vignette: {filterSettings.vignette}</label>
+                  <Slider
+                    value={[filterSettings.vignette]}
+                    onValueChange={([value]) => setFilterSettings(prev => ({ ...prev, vignette: value }))}
+                    max={1}
+                    min={0}
+                    step={0.1}
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={filterSettings.dither}
+                    onCheckedChange={(checked) => setFilterSettings(prev => ({ ...prev, dither: checked }))}
+                  />
+                  <label className="text-sm font-medium">Dithering</label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={filterSettings.stickers}
+                    onCheckedChange={(checked) => setFilterSettings(prev => ({ ...prev, stickers: checked }))}
+                  />
+                  <label className="text-sm font-medium">Add Stickers</label>
+                </div>
+              </div>
+
+              <Button 
+                onClick={generateLocalUglyImage} 
+                disabled={!selectedImage || isProcessing}
+                className="w-full"
+              >
+                {isProcessing ? (
+                  <>
+                    <Zap className="w-4 h-4 mr-2 animate-spin" />
+                    Applying filters...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4 mr-2" />
+                    Apply Local Filters
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+
+          {/* Results Section */}
+          {processedImage && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Processed Image</label>
+                <div className="relative aspect-square rounded-lg border overflow-hidden">
+                  <img
+                    src={processedImage}
+                    alt="Processed"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+              
+              <Button onClick={downloadImage} className="w-full">
+                <Download className="w-4 h-4 mr-2" />
+                Download Image
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
