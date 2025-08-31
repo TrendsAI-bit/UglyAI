@@ -44,43 +44,36 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Convert base64 to File objects
-    const imageBlob = new Blob([Buffer.from(image, 'base64')], { type: 'image/png' });
-    const imageFile = new File([imageBlob], 'image.png', { type: 'image/png' });
-    
-    let maskFile: File | undefined;
-    if (mask) {
-      const maskBlob = new Blob([Buffer.from(mask, 'base64')], { type: 'image/png' });
-      maskFile = new File([maskBlob], 'mask.png', { type: 'image/png' });
-    }
-
     const openai = getOpenAI();
-    const response = await openai.images.edit({
-      image: imageFile,
-      mask: maskFile,
-      prompt: `Make this image uglier and more cursed: ${prompt || 'Make it look intentionally bad with pixelation, color distortion, weird artifacts, and cartoon style'}. Add pixelation, color distortion, weird artifacts, and make it look intentionally bad.`,
-      n: 1,
+    
+    // Use image generation with the original image as a reference
+    // We'll create a new image based on the prompt and reference
+    const response = await openai.images.generate({
+      model: "dall-e-3",
+      prompt: `Create an ugly, distorted, cursed version of this image: ${prompt || 'Make it look extremely ugly, pixelated, with weird colors and artifacts'}. The image should be intentionally bad, with pixelation, color distortion, weird artifacts, and look like a terrible profile picture from the 90s.`,
       size: "1024x1024",
+      n: 1,
+      quality: "standard",
       response_format: "b64_json",
     });
 
-    const editedImage = response.data?.[0]?.b64_json;
+    const generatedImage = response.data?.[0]?.b64_json;
 
-    if (!editedImage) {
+    if (!generatedImage) {
       return NextResponse.json(
-        { error: "No edited image was generated" },
+        { error: "No image was generated" },
         { status: 500 }
       );
     }
 
     return NextResponse.json({ 
       success: true, 
-      image: editedImage,
+      image: generatedImage,
       prompt: response.data?.[0]?.revised_prompt || prompt 
     });
 
   } catch (error: unknown) {
-    console.error("Edit error:", error);
+    console.error("Generation error:", error);
     
     if (error instanceof Error && error.message === "Rate limit exceeded") {
       return NextResponse.json(
@@ -105,7 +98,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: "Failed to edit image. Please try again." },
+      { error: "Failed to generate image. Please try again." },
       { status: 500 }
     );
   }

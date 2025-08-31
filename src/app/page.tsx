@@ -34,7 +34,7 @@ export default function LandingPage() {
           UGLY AI
         </h1>
         <p className="text-xl mb-8 opacity-80">
-          Use AI to create intentionally awful profile pictures
+          Use AI to generate intentionally awful profile pictures
         </p>
         
         <Link href="/studio">
@@ -47,7 +47,7 @@ export default function LandingPage() {
       {/* Simple Asset Showcase */}
       <div>
         <h2 className="h-pixel text-2xl font-bold text-center mb-6">
-          Start with these faces
+          Get inspired by these faces
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {ASSETS.map((asset) => (
@@ -78,8 +78,8 @@ export default function LandingPage() {
             How it works
           </h2>
           <div className="space-y-4 text-sm">
-            <p>1. Upload an image or use our assets</p>
-            <p>2. AI makes it ugly with advanced effects</p>
+            <p>1. Get inspired by our assets or upload your own</p>
+            <p>2. AI generates a completely new ugly image</p>
             <p>3. Download your cursed creation</p>
           </div>
         </div>

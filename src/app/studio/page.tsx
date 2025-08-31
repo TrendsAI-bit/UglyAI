@@ -43,15 +43,14 @@ export default function StudioPage() {
     setIsProcessing(true);
     
     try {
-      // Convert image to base64 for API
-      const base64Image = selectedImage.split(',')[1]; // Remove data:image/png;base64, prefix
-      
-      const response = await fetch('/api/edit', {
+      // Use the generate API instead of edit API
+      const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          image: base64Image,
-          prompt: prompt || 'Make this image extremely ugly, distorted, cursed, and intentionally bad. Add pixelation, weird artifacts, color distortion, and make it look like a terrible profile picture from the 90s.',
+          prompt: prompt || 'Create an extremely ugly, distorted, cursed cartoon face profile picture. Make it look intentionally bad with pixelation, weird colors, artifacts, and make it look like a terrible profile picture from the 90s.',
+          size: '1024x1024',
+          n: 1,
         }),
       });
 
@@ -61,8 +60,12 @@ export default function StudioPage() {
         throw new Error(data.error || 'Failed to generate ugly image');
       }
 
-      setProcessedImage(`data:image/png;base64,${data.image}`);
-      toast.success('Image uglified with AI!');
+      if (data.images && data.images.length > 0) {
+        setProcessedImage(data.images[0]);
+        toast.success('AI generated an ugly image!');
+      } else {
+        throw new Error('No image was generated');
+      }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to generate ugly image';
       toast.error(errorMessage);
@@ -140,7 +143,7 @@ export default function StudioPage() {
             <Input
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Describe how to make it ugly (e.g., 'add pixelation, weird colors, make it cursed')"
+              placeholder="Describe the ugly image you want (e.g., 'pixelated face with weird colors and artifacts')"
               className="input-retro"
               disabled={isProcessing}
             />
@@ -153,7 +156,7 @@ export default function StudioPage() {
               disabled={isProcessing}
             >
               <Sparkles className="w-4 h-4 mr-2" />
-              {isProcessing ? 'AI is making it ugly...' : 'Make it Ugly with AI!'}
+              {isProcessing ? 'AI is generating ugly image...' : 'Generate Ugly Image with AI!'}
             </Button>
           </div>
         </div>
@@ -162,7 +165,7 @@ export default function StudioPage() {
       {/* Processed Image */}
       {processedImage && (
         <div className="panel">
-          <h3 className="h-pixel text-lg font-bold mb-4">Your AI-Uglified Creation:</h3>
+          <h3 className="h-pixel text-lg font-bold mb-4">Your AI-Generated Ugly Creation:</h3>
           <div className="flex justify-center">
             <img
               src={processedImage}
