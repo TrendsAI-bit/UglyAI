@@ -59,30 +59,6 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Original Project Reference */}
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 max-w-2xl mx-auto">
-        <div className="text-center">
-          <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-3">
-            <span className="text-blue-600 dark:text-blue-400 text-xl">⚡</span>
-          </div>
-          <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
-            Inspired by the Original
-          </h3>
-          <p className="text-blue-700 dark:text-blue-300 mb-4">
-            This project is inspired by the amazing original Ugly Avatar generator by txstc55. 
-            Check out their classic implementation for the full experience!
-          </p>
-          <a 
-            href="https://txstc55.github.io/ugly-avatar/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-          >
-            Visit Original Project →
-          </a>
-        </div>
-      </div>
-
       {/* How it works */}
       <div className="text-center">
         <h2 className="text-2xl font-bold mb-6">How it works</h2>
@@ -111,7 +87,7 @@ export default function LandingPage() {
       {/* Simple Footer */}
       <footer className="text-center opacity-60">
         <p className="text-sm">
-          AI Generation + Local Filters • Inspired by the original Ugly Avatar project
+          AI Generation + Local Filters
         </p>
       </footer>
     </div>

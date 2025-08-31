@@ -226,33 +226,6 @@ export default function StudioPage() {
         </button>
       </div>
 
-      {/* Original Project Reference */}
-      <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <div className="flex items-start space-x-3">
-          <div className="flex-shrink-0">
-            <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-              <span className="text-blue-600 dark:text-blue-400 text-sm font-bold">⚡</span>
-            </div>
-          </div>
-          <div className="flex-1">
-            <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
-              Try the Original Ugly Avatar Generator
-            </h3>
-            <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
-              For the classic experience with more advanced local filters, check out the original project by txstc55.
-            </p>
-            <a 
-              href="https://txstc55.github.io/ugly-avatar/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 transition-colors"
-            >
-              Visit Original Project →
-            </a>
-          </div>
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column - Image Selection */}
         <div className="space-y-4">
