@@ -226,6 +226,18 @@ export default function StudioPage() {
         </button>
       </div>
 
+      {/* Simple Link */}
+      <div className="text-center">
+        <a 
+          href="https://txstc55.github.io/ugly-avatar/" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Classic Version →
+        </a>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column - Image Selection */}
         <div className="space-y-4">
