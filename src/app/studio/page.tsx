@@ -1,317 +1,190 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { Toolbar } from '@/components/toolbar';
-import { Dropzone } from '@/components/dropzone';
-import { UglyCanvas } from '@/components/ugly-canvas';
-import { PreviewGrid } from '@/components/preview-grid';
-import { AssetGallery } from '@/components/asset-gallery';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { FilterSettings } from '@/lib/schemas';
-import { PRESETS } from '@/lib/presets';
-import { blobToDataURL, stripEXIF } from '@/lib/image';
 import { toast } from 'sonner';
-import { Sparkles, Wand2, Image as ImageIcon, Download } from 'lucide-react';
+import { Download, Upload, Sparkles } from 'lucide-react';
+
+const ASSETS = [
+  '/assets/face (1).png',
+  '/assets/face (2).png',
+  '/assets/face (3).png',
+  '/assets/face.png'
+];
 
 export default function StudioPage() {
-  const [engine, setEngine] = useState<'ai' | 'filter'>('ai');
-  const [prompt, setPrompt] = useState('');
-  const [uploadedImage, setUploadedImage] = useState<string>('');
-  const [generatedImages, setGeneratedImages] = useState<string[]>([]);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [settings, setSettings] = useState<FilterSettings>(PRESETS['Cursed Cartoon']);
-  const [showAssetGallery, setShowAssetGallery] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string>('');
+  const [processedImage, setProcessedImage] = useState<string>('');
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleFileSelect = useCallback(async (file: File) => {
-    try {
-      const dataURL = await blobToDataURL(file);
-      const cleanDataURL = await stripEXIF(dataURL);
-      setUploadedImage(cleanDataURL);
-      toast.success('Image uploaded successfully!');
-    } catch (error) {
-      toast.error('Failed to upload image');
-      console.error('Upload error:', error);
+  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setSelectedImage(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   }, []);
 
   const handleAssetSelect = useCallback((assetPath: string) => {
-    setUploadedImage(assetPath);
-    setEngine('filter');
-    setShowAssetGallery(false);
-    toast.success('Asset selected! Now apply filters to make it ugly.');
+    setSelectedImage(assetPath);
   }, []);
 
-  const generateAIImages = useCallback(async () => {
-    if (!prompt.trim()) {
-      toast.error('Please enter a prompt');
+  const applyUglyEffects = useCallback(() => {
+    if (!selectedImage) {
+      toast.error('Please select an image first');
       return;
     }
 
-    setIsGenerating(true);
-    try {
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: prompt.trim(),
-          size: '1024x1024',
-          n: 1,
-        }),
-      });
-
-      const data = await response.json();
+    setIsProcessing(true);
+    
+    // Simple ugly effects using canvas
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    
+    img.onload = () => {
+      canvas.width = 512;
+      canvas.height = 512;
       
-      if (!response.ok) {
-        throw new Error(data.error || 'Generation failed');
+      // Draw image
+      ctx?.drawImage(img, 0, 0, 512, 512);
+      
+      // Apply simple pixelation
+      const imageData = ctx?.getImageData(0, 0, 512, 512);
+      if (imageData) {
+        const data = imageData.data;
+        const pixelSize = 8;
+        
+        for (let y = 0; y < 512; y += pixelSize) {
+          for (let x = 0; x < 512; x += pixelSize) {
+            const idx = (y * 512 + x) * 4;
+            const r = data[idx];
+            const g = data[idx + 1];
+            const b = data[idx + 2];
+            
+            // Fill pixel block with average color
+            for (let py = 0; py < pixelSize && y + py < 512; py++) {
+              for (let px = 0; px < pixelSize && x + px < 512; px++) {
+                const pidx = ((y + py) * 512 + (x + px)) * 4;
+                data[pidx] = r;
+                data[pidx + 1] = g;
+                data[pidx + 2] = b;
+              }
+            }
+          }
+        }
+        
+        ctx?.putImageData(imageData, 0, 0);
+        setProcessedImage(canvas.toDataURL());
       }
-
-      setGeneratedImages(data.images);
-      toast.success('AI images generated!');
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to generate images';
-      toast.error(errorMessage);
-      console.error('Generation error:', error);
-    } finally {
-      setIsGenerating(false);
-    }
-  }, [prompt]);
-
-  const applyFilter = useCallback(() => {
-    if (!uploadedImage) {
-      toast.error('Please upload an image first');
-      return;
-    }
-
-    setIsGenerating(true);
-    // The UglyCanvas component will handle the processing
-    // and call onProcessed when done
-  }, [uploadedImage]);
-
-  const handleFilterProcessed = useCallback((processedImage: string) => {
-    setGeneratedImages([processedImage]);
-    setIsGenerating(false);
-    toast.success('Image uglified!');
-  }, []);
-
-  const randomizeSettings = useCallback(() => {
-    const presets = Object.values(PRESETS);
-    const randomPreset = presets[Math.floor(Math.random() * presets.length)];
-    setSettings(randomPreset);
-    toast.success('Settings randomized!');
-  }, []);
-
-  const makeUglier = useCallback(() => {
-    if (generatedImages.length === 0) {
-      toast.error('No images to make uglier');
-      return;
-    }
-
-    // Apply additional random effects
-    const uglierSettings = {
-      ...settings,
-      pixelSize: Math.min(50, settings.pixelSize + Math.floor(Math.random() * 10)),
-      noise: Math.min(100, settings.noise + Math.floor(Math.random() * 20)),
-      jpegMush: Math.min(5, settings.jpegMush + Math.floor(Math.random() * 2)),
-      aberration: Math.min(10, settings.aberration + Math.floor(Math.random() * 3)),
+      
+      setIsProcessing(false);
+      toast.success('Image uglified!');
     };
-    setSettings(uglierSettings);
-    toast.success('Made it uglier!');
-  }, [settings, generatedImages]);
+    
+    img.src = selectedImage;
+  }, [selectedImage]);
 
-  const handleReUglify = useCallback(() => {
-    if (engine === 'filter' && uploadedImage) {
-      // Re-apply filter to the uploaded image
-      setIsGenerating(true);
-    } else {
-      // Re-generate AI image
-      generateAIImages();
+  const downloadImage = useCallback(() => {
+    if (processedImage) {
+      const link = document.createElement('a');
+      link.href = processedImage;
+      link.download = 'ugly-avatar.png';
+      link.click();
+      toast.success('Image downloaded!');
     }
-  }, [engine, uploadedImage, generateAIImages]);
-
-  const handleMakeVariation = useCallback(async (index: number) => {
-    if (generatedImages.length === 0) return;
-
-    setIsGenerating(true);
-    try {
-      const response = await fetch('/api/edit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          image: generatedImages[index].split(',')[1], // Remove data:image/png;base64, prefix
-          prompt: 'Make this even uglier and more cursed',
-        }),
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Variation failed');
-      }
-
-      const newImages = [...generatedImages];
-      newImages[index] = `data:image/png;base64,${data.image}`;
-      setGeneratedImages(newImages);
-      toast.success('Variation created!');
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to create variation';
-      toast.error(errorMessage);
-      console.error('Variation error:', error);
-    } finally {
-      setIsGenerating(false);
-    }
-  }, [generatedImages]);
-
-  const downloadImage = useCallback((imageData: string, index: number) => {
-    const link = document.createElement('a');
-    link.href = imageData;
-    link.download = `ugly-avatar-${index + 1}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success('Image downloaded!');
-  }, []);
+  }, [processedImage]);
 
   return (
     <div className="space-y-6">
-      <h1 className="h-pixel text-3xl sm:text-4xl font-bold text-center mb-8 crt-glow">
-        UGLY AI STUDIO
+      <h1 className="h-pixel text-3xl font-bold text-center">
+        UGLY STUDIO
       </h1>
-      
-      {/* Asset Gallery Toggle */}
-      <div className="text-center mb-6">
-        <Button
-          onClick={() => setShowAssetGallery(!showAssetGallery)}
-          className="btn-retro"
-          variant="outline"
-        >
-          <ImageIcon className="w-4 h-4 mr-2" />
-          {showAssetGallery ? 'Hide' : 'Show'} Asset Gallery
-        </Button>
+
+      {/* Asset Selection */}
+      <div>
+        <h2 className="h-pixel text-xl font-bold mb-4">Choose a face to start with:</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          {ASSETS.map((asset, index) => (
+            <div
+              key={index}
+              className="panel cursor-pointer hover:ring-crt transition-all"
+              onClick={() => handleAssetSelect(asset)}
+            >
+              <img
+                src={asset}
+                alt={`Face ${index + 1}`}
+                className="w-full h-32 object-contain rounded"
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* File Upload */}
+        <div className="panel">
+          <h3 className="h-pixel text-lg font-bold mb-4">Or upload your own image:</h3>
+          <div className="flex items-center gap-4">
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="input-retro"
+            />
+            <Upload className="w-5 h-5" />
+          </div>
+        </div>
       </div>
 
-      {/* Asset Gallery */}
-      {showAssetGallery && (
-        <div className="mb-8">
-          <AssetGallery onAssetSelect={handleAssetSelect} />
+      {/* Image Preview */}
+      {selectedImage && (
+        <div className="panel">
+          <h3 className="h-pixel text-lg font-bold mb-4">Selected Image:</h3>
+          <div className="flex justify-center">
+            <img
+              src={selectedImage}
+              alt="Selected"
+              className="w-64 h-64 object-contain rounded border border-current"
+            />
+          </div>
+          <div className="mt-4 text-center">
+            <Button
+              onClick={applyUglyEffects}
+              className="btn-ugly"
+              disabled={isProcessing}
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              {isProcessing ? 'Processing...' : 'Make it Ugly!'}
+            </Button>
+          </div>
         </div>
       )}
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Panel - Controls */}
-        <div className="lg:col-span-1 space-y-6">
-          <Toolbar
-            engine={engine}
-            onEngineChange={setEngine}
-            settings={settings}
-            onSettingsChange={setSettings}
-            onRandomize={randomizeSettings}
-            onMakeUglier={makeUglier}
-            isGenerating={isGenerating}
-          />
 
-          {/* AI Prompt Input */}
-          {engine === 'ai' && (
-            <div className="panel">
-              <h3 className="h-pixel text-lg font-bold mb-4">AI Prompt:</h3>
-              <Input
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Describe your ugly avatar..."
-                className="input-retro"
-                disabled={isGenerating}
-              />
-              <Button
-                onClick={generateAIImages}
-                className="btn-ugly w-full mt-4"
-                disabled={isGenerating || !prompt.trim()}
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                Generate AI Avatar
-              </Button>
-            </div>
-          )}
-
-          {/* Image Upload */}
-          {engine === 'filter' && (
-            <div className="space-y-4">
-              <h3 className="h-pixel text-lg font-bold">Upload Image:</h3>
-              <Dropzone onFileSelect={handleFileSelect} />
-              
-              {uploadedImage && (
-                <div className="space-y-4">
-                  <h4 className="h-pixel text-md font-bold">Preview:</h4>
-                  <img
-                    src={uploadedImage}
-                    alt="Uploaded"
-                    className="w-full h-32 object-cover rounded-lg border border-current"
-                  />
-                  <Button
-                    onClick={applyFilter}
-                    className="btn-ugly w-full"
-                    disabled={isGenerating || !uploadedImage}
-                  >
-                    <Wand2 className="w-4 h-4 mr-2" />
-                    Uglify Image
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Quick Actions */}
-          {generatedImages.length > 0 && (
-            <div className="panel">
-              <h3 className="h-pixel text-lg font-bold mb-4">Quick Actions:</h3>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  onClick={() => downloadImage(generatedImages[0], 0)}
-                  className="btn-retro text-sm"
-                  size="sm"
-                >
-                  <Download className="w-3 h-3 mr-1" />
-                  Download
-                </Button>
-                <Button
-                  onClick={() => handleMakeVariation(0)}
-                  className="btn-retro text-sm"
-                  size="sm"
-                  disabled={isGenerating}
-                >
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  Variation
-                </Button>
-              </div>
-            </div>
-          )}
+      {/* Processed Image */}
+      {processedImage && (
+        <div className="panel">
+          <h3 className="h-pixel text-lg font-bold mb-4">Your Ugly Creation:</h3>
+          <div className="flex justify-center">
+            <img
+              src={processedImage}
+              alt="Processed"
+              className="w-64 h-64 object-contain rounded border border-current"
+            />
+          </div>
+          <div className="mt-4 text-center">
+            <Button
+              onClick={downloadImage}
+              className="btn-retro"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download
+            </Button>
+          </div>
         </div>
-
-        {/* Right Panel - Preview */}
-        <div className="lg:col-span-2 space-y-6">
-          <h2 className="h-pixel text-2xl font-bold text-amber">
-            Preview
-          </h2>
-          
-          {engine === 'filter' && uploadedImage && (
-            <div className="mb-6">
-              <h3 className="h-pixel text-lg font-bold mb-4">Filter Preview:</h3>
-              <UglyCanvas
-                imageSrc={uploadedImage}
-                settings={settings}
-                onProcessed={handleFilterProcessed}
-                className="max-w-md mx-auto"
-              />
-            </div>
-          )}
-
-          <PreviewGrid
-            images={generatedImages}
-            onReUglify={handleReUglify}
-            onMakeVariation={handleMakeVariation}
-            isProcessing={isGenerating}
-          />
-        </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -5,13 +5,10 @@
 
 /* ---- Theme tokens (Tailwind v4) ---- */
 @theme {
-  --color-crt-bg: #0a0d0a;
-  --color-crt-green: #00ff99;
-  --color-crt-amber: #ffcc66;
-  --color-crt-magenta: #ff3df0;
-  --color-crt-scan: rgba(0,0,0,0.25);
-
-  --radius-crt: 20px;
+  --color-bg: #0a0d0a;
+  --color-text: #00ff99;
+  --color-accent: #ffcc66;
+  --color-border: #00ff99;
 
   --font-pixel: "Press Start 2P", monospace;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -30,163 +27,58 @@ html, body {
   height: 100%;
 }
 body {
-  @apply bg-[--color-crt-bg] text-[--color-crt-green];
+  @apply bg-[--color-bg] text-[--color-text];
   font-family: var(--font-mono);
 }
 
-/* ---- CRT wrapper ---- */
-.crt {
-  position: relative;
-  border-radius: var(--radius-crt);
-  border: 2px solid rgba(0,255,153,0.35);
-  box-shadow:
-    0 0 0 4px rgba(0, 255, 153, 0.08) inset,
-    0 0 32px rgba(0, 255, 153, 0.2);
-  overflow: hidden;
-  isolation: isolate;
-  backdrop-filter: blur(0.3px);
+/* Simple panel styling */
+.panel {
+  @apply rounded-lg border p-4 sm:p-5 md:p-6 bg-black/30;
+  border-color: rgba(0,255,153,.25);
 }
 
-/* scanlines overlay */
-.crt::before {
-  content: "";
-  position: absolute; inset: 0;
-  pointer-events: none;
-  background:
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0px,
-      transparent 1px,
-      var(--color-crt-scan) 2px,
-      var(--color-crt-scan) 3px
-    );
-  mix-blend-mode: multiply;
-  opacity: .45;
-  z-index: 2;
-}
-
-/* subtle glass glare */
-.crt::after {
-  content: "";
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(120% 60% at 10% 0%, rgba(255,255,255,0.08), transparent 60%),
-    radial-gradient(120% 60% at 90% 100%, rgba(255,255,255,0.05), transparent 60%);
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* phosphor glow + gentle flicker */
-.crt-glow {
-  text-shadow:
-    0 0 2px var(--color-crt-green),
-    0 0 6px var(--color-crt-green);
-  animation: crt-flicker 3.6s infinite steps(60, end);
-}
-
-@keyframes crt-flicker {
-  0%, 100% { opacity: 1; }
-  98% { opacity: .98; }
-  99% { opacity: .94; }
-}
-
-/* "monitor bezel" container helper */
-.crt-bezel {
-  @apply p-4 sm:p-6 md:p-8 bg-black/40 rounded-[--radius-crt];
-  border: 1px solid rgba(0,255,153,0.2);
-}
-
-/* retro buttons/toggles accents */
-.btn-retro {
-  @apply inline-flex items-center gap-2 rounded-md px-3 py-2 border;
+/* Simple button styling */
+.btn-ugly {
+  @apply inline-flex items-center gap-2 rounded-md px-4 py-2 border;
   border-color: rgba(0,255,153,.35);
   background: linear-gradient(180deg, rgba(0,255,153,.12), rgba(0,255,153,.02));
-  color: var(--color-crt-amber);
-  text-shadow: 0 0 4px rgba(255,204,102,.4);
+  color: var(--color-accent);
 }
-.btn-retro:hover {
+
+.btn-ugly:hover {
   filter: brightness(1.15);
   box-shadow: 0 0 12px rgba(0,255,153,.25);
 }
 
-/* input fields */
+.btn-retro {
+  @apply inline-flex items-center gap-2 rounded-md px-4 py-2 border;
+  border-color: rgba(0,255,153,.25);
+  background: rgba(0,255,153,.05);
+  color: var(--color-text);
+}
+
+.btn-retro:hover {
+  background: rgba(0,255,153,.1);
+}
+
+/* Simple input styling */
 .input-retro {
   @apply w-full rounded-md px-3 py-2 border outline-none bg-black/40;
   border-color: rgba(0,255,153,.25);
-  color: var(--color-crt-green);
-}
-.input-retro::placeholder { color: rgba(0,255,153,.55); }
-
-/* slider track color fix for radix/tailwind */
-.radix-slider [data-orientation="horizontal"] > div:nth-child(2) {
-  background-color: rgba(0,255,153,.35);
-}
-.radix-slider [data-orientation="horizontal"] > div:nth-child(3) {
-  background-color: var(--color-crt-magenta);
+  color: var(--color-text);
 }
 
-/* cards/panels */
-.panel {
-  @apply rounded-lg border p-4 sm:p-5 md:p-6 bg-black/30;
-  border-color: rgba(0,255,153,.25);
-  box-shadow: 0 0 18px rgba(0,255,153,.08) inset;
+.input-retro::placeholder { 
+  color: rgba(0,255,153,.55); 
 }
 
-/* headings: pixel font for flavor */
-.h-pixel { font-family: var(--font-pixel); letter-spacing: 0.04em; }
-
-/* utility helpers */
-.text-amber { color: var(--color-crt-amber); }
-.text-magenta { color: var(--color-crt-magenta); }
-.ring-crt { box-shadow: 0 0 0 3px rgba(0,255,153,.35); }
-
-/* Legacy compatibility - keep existing classes */
-.pixel-text {
-  font-family: var(--font-pixel);
-  font-size: 1.2em;
-  letter-spacing: 0.05em;
+/* Pixel font for headings */
+.h-pixel { 
+  font-family: var(--font-pixel); 
+  letter-spacing: 0.04em; 
 }
 
-.btn-ugly {
-  background: linear-gradient(45deg, var(--color-crt-magenta), var(--color-crt-amber));
-  border: 2px solid var(--color-crt-green);
-  color: white;
-  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.8);
-  box-shadow: 
-    inset 0 0 10px rgba(255, 255, 255, 0.2),
-    0 4px 8px rgba(0, 0, 0, 0.3),
-    0 0 20px rgba(255, 0, 255, 0.3);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-ugly::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.btn-ugly:hover::before {
-  left: 100%;
-}
-
-.btn-ugly:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 
-    inset 0 0 10px rgba(255, 255, 255, 0.3),
-    0 6px 12px rgba(0, 0, 0, 0.4),
-    0 0 30px rgba(255, 0, 255, 0.5);
-}
-
-.btn-ugly:active {
-  transform: translateY(0) scale(0.98);
-  box-shadow: 
-    inset 0 0 10px rgba(0, 0, 0, 0.3),
-    0 2px 4px rgba(0, 0, 0, 0.3);
+/* Utility helpers */
+.ring-crt { 
+  box-shadow: 0 0 0 3px rgba(0,255,153,.35); 
 }
