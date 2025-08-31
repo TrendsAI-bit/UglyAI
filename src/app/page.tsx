@@ -71,16 +71,27 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Simple Features */}
+      {/* How it works */}
       <div className="text-center">
-        <div className="panel max-w-2xl mx-auto">
-          <h2 className="h-pixel text-xl font-bold mb-4">
-            How it works
-          </h2>
-          <div className="space-y-4 text-sm">
-            <p>1. Get inspired by our assets or upload your own</p>
-            <p>2. AI generates a completely new ugly image</p>
-            <p>3. Download your cursed creation</p>
+        <h2 className="text-2xl font-bold mb-6">How it works</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-2">
+            <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center mx-auto">
+              <span className="text-primary-foreground font-bold">1</span>
+            </div>
+            <p>1. Upload an image or choose from assets</p>
+          </div>
+          <div className="space-y-2">
+            <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center mx-auto">
+              <span className="text-primary-foreground font-bold">2</span>
+            </div>
+            <p>2. Choose AI generation or fast local filters</p>
+          </div>
+          <div className="space-y-2">
+            <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center mx-auto">
+              <span className="text-primary-foreground font-bold">3</span>
+            </div>
+            <p>3. Download your ugly masterpiece</p>
           </div>
         </div>
       </div>
@@ -88,7 +99,7 @@ export default function LandingPage() {
       {/* Simple Footer */}
       <footer className="text-center opacity-60">
         <p className="text-sm">
-          Powered by OpenAI • Inspired by the original Ugly Avatar project
+          AI Generation + Local Filters • Inspired by the original Ugly Avatar project
         </p>
       </footer>
     </div>
