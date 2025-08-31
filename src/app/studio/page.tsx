@@ -43,14 +43,15 @@ export default function StudioPage() {
     setIsProcessing(true);
     
     try {
-      // Use the generate API instead of edit API
-      const response = await fetch('/api/generate', {
+      const base64Image = selectedImage.split(',')[1];
+      
+      const response = await fetch('/api/image-to-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: prompt || 'Create an extremely ugly, distorted, cursed cartoon face profile picture. Make it look intentionally bad with pixelation, weird colors, artifacts, and make it look like a terrible profile picture from the 90s.',
-          size: '1024x1024',
-          n: 1,
+          image: base64Image,
+          prompt: prompt || 'Make this image extremely ugly, distorted, cursed, and intentionally bad. Add pixelation, weird artifacts, color distortion, and make it look like a terrible profile picture from the 90s.',
+          size: '1024x1024'
         }),
       });
 
@@ -68,7 +69,7 @@ export default function StudioPage() {
         const imageDataUrl = `data:image/png;base64,${data.images[0]}`;
         console.log('Setting image:', imageDataUrl.substring(0, 100) + '...'); // Debug log
         setProcessedImage(imageDataUrl);
-        toast.success('AI generated an ugly image!');
+        toast.success('AI generated an ugly version of your image!');
       } else {
         console.log('No images in response:', data); // Debug log
         throw new Error('No image was generated');
@@ -145,25 +146,36 @@ export default function StudioPage() {
           </div>
           
           {/* AI Prompt Input */}
-          <div className="mb-4">
-            <h4 className="h-pixel text-md font-bold mb-2">AI Prompt (optional):</h4>
-            <Input
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Describe the ugly image you want (e.g., 'pixelated face with weird colors and artifacts')"
-              className="input-retro"
-              disabled={isProcessing}
-            />
-          </div>
-          
-          <div className="text-center">
-            <Button
-              onClick={generateUglyImage}
-              className="btn-ugly"
-              disabled={isProcessing}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                AI Prompt (optional)
+              </label>
+              <Input
+                type="text"
+                placeholder="Describe how to make it ugly..."
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            
+            <Button 
+              onClick={generateUglyImage} 
+              disabled={!selectedImage || isProcessing}
+              className="w-full"
             >
-              <Sparkles className="w-4 h-4 mr-2" />
-              {isProcessing ? 'AI is generating ugly image...' : 'Generate Ugly Image with AI!'}
+              {isProcessing ? (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2 animate-spin" />
+                  Making it ugly...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Make My Image Ugly with AI
+                </>
+              )}
             </Button>
           </div>
         </div>

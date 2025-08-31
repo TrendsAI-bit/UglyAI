@@ -13,6 +13,12 @@ export const EditRequestSchema = z.object({
   prompt: z.string().min(3).max(1000),
 });
 
+export const ImageToImageRequestSchema = z.object({
+  image: z.string().min(1), // base64 reference image
+  prompt: z.string().min(3).max(1000),
+  size: z.enum(["512x512", "1024x1024"]).default("1024x1024"),
+});
+
 export const FilterSettingsSchema = z.object({
   pixelSize: z.number().min(1).max(50).default(16),
   posterizeLevels: z.number().min(2).max(8).default(3),
@@ -26,4 +32,5 @@ export const FilterSettingsSchema = z.object({
 
 export type GenerateRequest = z.infer<typeof GenerateRequestSchema>;
 export type EditRequest = z.infer<typeof EditRequestSchema>;
+export type ImageToImageRequest = z.infer<typeof ImageToImageRequestSchema>;
 export type FilterSettings = z.infer<typeof FilterSettingsSchema>;
