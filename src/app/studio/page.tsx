@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { CRTFrame } from '@/components/crt-frame';
 import { Toolbar } from '@/components/toolbar';
 import { Dropzone } from '@/components/dropzone';
 import { UglyCanvas } from '@/components/ugly-canvas';
@@ -174,149 +173,145 @@ export default function StudioPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-hsl(var(--crt-dark)) to-hsl(var(--crt-dark) / 0.8) p-4">
-      <CRTFrame className="max-w-7xl mx-auto">
-        <div className="p-6">
-          <h1 className="pixel-text text-4xl font-bold text-center mb-8 text-hsl(var(--crt-green))">
-            UGLY AI STUDIO
-          </h1>
-          
-          {/* Asset Gallery Toggle */}
-          <div className="text-center mb-6">
-            <Button
-              onClick={() => setShowAssetGallery(!showAssetGallery)}
-              className="btn-ugly"
-              variant="outline"
-            >
-              <ImageIcon className="w-4 h-4 mr-2" />
-              {showAssetGallery ? 'Hide' : 'Show'} Asset Gallery
-            </Button>
-          </div>
+    <div className="space-y-6">
+      <h1 className="h-pixel text-3xl sm:text-4xl font-bold text-center mb-8 crt-glow">
+        UGLY AI STUDIO
+      </h1>
+      
+      {/* Asset Gallery Toggle */}
+      <div className="text-center mb-6">
+        <Button
+          onClick={() => setShowAssetGallery(!showAssetGallery)}
+          className="btn-retro"
+          variant="outline"
+        >
+          <ImageIcon className="w-4 h-4 mr-2" />
+          {showAssetGallery ? 'Hide' : 'Show'} Asset Gallery
+        </Button>
+      </div>
 
-          {/* Asset Gallery */}
-          {showAssetGallery && (
-            <div className="mb-8">
-              <AssetGallery onAssetSelect={handleAssetSelect} />
+      {/* Asset Gallery */}
+      {showAssetGallery && (
+        <div className="mb-8">
+          <AssetGallery onAssetSelect={handleAssetSelect} />
+        </div>
+      )}
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Panel - Controls */}
+        <div className="lg:col-span-1 space-y-6">
+          <Toolbar
+            engine={engine}
+            onEngineChange={setEngine}
+            settings={settings}
+            onSettingsChange={setSettings}
+            onRandomize={randomizeSettings}
+            onMakeUglier={makeUglier}
+            isGenerating={isGenerating}
+          />
+
+          {/* AI Prompt Input */}
+          {engine === 'ai' && (
+            <div className="panel">
+              <h3 className="h-pixel text-lg font-bold mb-4">AI Prompt:</h3>
+              <Input
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Describe your ugly avatar..."
+                className="input-retro"
+                disabled={isGenerating}
+              />
+              <Button
+                onClick={generateAIImages}
+                className="btn-ugly w-full mt-4"
+                disabled={isGenerating || !prompt.trim()}
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Generate AI Avatar
+              </Button>
             </div>
           )}
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Panel - Controls */}
-            <div className="lg:col-span-1 space-y-6">
-              <Toolbar
-                engine={engine}
-                onEngineChange={setEngine}
-                settings={settings}
-                onSettingsChange={setSettings}
-                onRandomize={randomizeSettings}
-                onMakeUglier={makeUglier}
-                isGenerating={isGenerating}
-              />
 
-              {/* AI Prompt Input */}
-              {engine === 'ai' && (
-                <div className="space-y-4 p-6 bg-hsl(var(--crt-beige) / 0.1) rounded-lg border border-hsl(var(--crt-green))">
-                  <h3 className="pixel-text text-lg font-bold">AI Prompt:</h3>
-                  <Input
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    placeholder="Describe your ugly avatar..."
-                    className="pixel-text"
-                    disabled={isGenerating}
+          {/* Image Upload */}
+          {engine === 'filter' && (
+            <div className="space-y-4">
+              <h3 className="h-pixel text-lg font-bold">Upload Image:</h3>
+              <Dropzone onFileSelect={handleFileSelect} />
+              
+              {uploadedImage && (
+                <div className="space-y-4">
+                  <h4 className="h-pixel text-md font-bold">Preview:</h4>
+                  <img
+                    src={uploadedImage}
+                    alt="Uploaded"
+                    className="w-full h-32 object-cover rounded-lg border border-current"
                   />
                   <Button
-                    onClick={generateAIImages}
+                    onClick={applyFilter}
                     className="btn-ugly w-full"
-                    disabled={isGenerating || !prompt.trim()}
+                    disabled={isGenerating || !uploadedImage}
                   >
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Generate AI Avatar
+                    <Wand2 className="w-4 h-4 mr-2" />
+                    Uglify Image
                   </Button>
                 </div>
               )}
-
-              {/* Image Upload */}
-              {engine === 'filter' && (
-                <div className="space-y-4">
-                  <h3 className="pixel-text text-lg font-bold">Upload Image:</h3>
-                  <Dropzone onFileSelect={handleFileSelect} />
-                  
-                  {uploadedImage && (
-                    <div className="space-y-4">
-                      <h4 className="pixel-text text-md font-bold">Preview:</h4>
-                      <img
-                        src={uploadedImage}
-                        alt="Uploaded"
-                        className="w-full h-32 object-cover rounded-lg border border-hsl(var(--crt-green))"
-                      />
-                      <Button
-                        onClick={applyFilter}
-                        className="btn-ugly w-full"
-                        disabled={isGenerating || !uploadedImage}
-                      >
-                        <Wand2 className="w-4 h-4 mr-2" />
-                        Uglify Image
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Quick Actions */}
-              {generatedImages.length > 0 && (
-                <div className="space-y-4 p-6 bg-hsl(var(--crt-beige) / 0.1) rounded-lg border border-hsl(var(--crt-green))">
-                  <h3 className="pixel-text text-lg font-bold">Quick Actions:</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button
-                      onClick={() => downloadImage(generatedImages[0], 0)}
-                      className="btn-ugly text-sm"
-                      size="sm"
-                    >
-                      <Download className="w-3 h-3 mr-1" />
-                      Download
-                    </Button>
-                    <Button
-                      onClick={() => handleMakeVariation(0)}
-                      className="btn-ugly text-sm"
-                      size="sm"
-                      disabled={isGenerating}
-                    >
-                      <Sparkles className="w-3 h-3 mr-1" />
-                      Variation
-                    </Button>
-                  </div>
-                </div>
-              )}
             </div>
+          )}
 
-            {/* Right Panel - Preview */}
-            <div className="lg:col-span-2 space-y-6">
-              <h2 className="pixel-text text-2xl font-bold text-hsl(var(--crt-amber))">
-                Preview
-              </h2>
-              
-              {engine === 'filter' && uploadedImage && (
-                <div className="mb-6">
-                  <h3 className="pixel-text text-lg font-bold mb-4">Filter Preview:</h3>
-                  <UglyCanvas
-                    imageSrc={uploadedImage}
-                    settings={settings}
-                    onProcessed={handleFilterProcessed}
-                    className="max-w-md mx-auto"
-                  />
-                </div>
-              )}
+          {/* Quick Actions */}
+          {generatedImages.length > 0 && (
+            <div className="panel">
+              <h3 className="h-pixel text-lg font-bold mb-4">Quick Actions:</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  onClick={() => downloadImage(generatedImages[0], 0)}
+                  className="btn-retro text-sm"
+                  size="sm"
+                >
+                  <Download className="w-3 h-3 mr-1" />
+                  Download
+                </Button>
+                <Button
+                  onClick={() => handleMakeVariation(0)}
+                  className="btn-retro text-sm"
+                  size="sm"
+                  disabled={isGenerating}
+                >
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  Variation
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
 
-              <PreviewGrid
-                images={generatedImages}
-                onReUglify={handleReUglify}
-                onMakeVariation={handleMakeVariation}
-                isProcessing={isGenerating}
+        {/* Right Panel - Preview */}
+        <div className="lg:col-span-2 space-y-6">
+          <h2 className="h-pixel text-2xl font-bold text-amber">
+            Preview
+          </h2>
+          
+          {engine === 'filter' && uploadedImage && (
+            <div className="mb-6">
+              <h3 className="h-pixel text-lg font-bold mb-4">Filter Preview:</h3>
+              <UglyCanvas
+                imageSrc={uploadedImage}
+                settings={settings}
+                onProcessed={handleFilterProcessed}
+                className="max-w-md mx-auto"
               />
             </div>
-          </div>
+          )}
+
+          <PreviewGrid
+            images={generatedImages}
+            onReUglify={handleReUglify}
+            onMakeVariation={handleMakeVariation}
+            isProcessing={isGenerating}
+          />
         </div>
-      </CRTFrame>
+      </div>
     </div>
   );
 }

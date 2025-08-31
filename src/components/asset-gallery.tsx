@@ -33,10 +33,10 @@ export function AssetGallery({ className = "", onAssetSelect }: AssetGalleryProp
   return (
     <div className={`space-y-6 ${className}`}>
       <div className="text-center">
-        <h3 className="pixel-text text-2xl font-bold text-hsl(var(--crt-green)) mb-2">
+        <h3 className="h-pixel text-2xl font-bold mb-2">
           Cartoon Face Assets
         </h3>
-        <p className="text-hsl(var(--crt-beige)) text-sm">
+        <p className="text-sm opacity-70">
           Click on any face to use it as a starting point
         </p>
       </div>
@@ -48,7 +48,7 @@ export function AssetGallery({ className = "", onAssetSelect }: AssetGalleryProp
             className="group cursor-pointer transform hover:scale-105 transition-all duration-200"
             onClick={() => onAssetSelect?.(asset.path)}
           >
-            <div className="relative bg-hsl(var(--crt-beige) / 0.1) rounded-lg border-2 border-hsl(var(--crt-green)) p-4 hover:border-hsl(var(--crt-pink)) transition-colors duration-200">
+            <div className="relative panel hover:ring-crt transition-all duration-200">
               <div className="relative w-full aspect-square mb-3">
                 <Image
                   src={asset.path}
@@ -58,10 +58,10 @@ export function AssetGallery({ className = "", onAssetSelect }: AssetGalleryProp
                   sizes="(max-width: 768px) 50vw, 25vw"
                 />
               </div>
-              <h4 className="pixel-text text-sm font-bold text-hsl(var(--crt-green)) text-center mb-1">
+              <h4 className="h-pixel text-sm font-bold text-center mb-1">
                 {asset.name}
               </h4>
-              <p className="text-xs text-hsl(var(--crt-beige) / 0.8) text-center">
+              <p className="text-xs opacity-70 text-center">
                 {asset.description}
               </p>
             </div>
@@ -70,7 +70,7 @@ export function AssetGallery({ className = "", onAssetSelect }: AssetGalleryProp
       </div>
       
       <div className="text-center">
-        <p className="text-xs text-hsl(var(--crt-beige) / 0.6)">
+        <p className="text-xs opacity-50">
           All assets are 500x500 PNG files with transparent backgrounds
         </p>
       </div>

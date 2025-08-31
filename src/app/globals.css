@@ -1,178 +1,155 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* src/app/globals.css */
 
-@import url('https://fonts.googleapis.com/css2?family=VT323:wght@400&display=swap');
+/* Tailwind v4 core */
+@import "tailwindcss";
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
-    
-    /* CRT Theme Colors */
-    --crt-green: 120 100% 25%;
-    --crt-amber: 45 100% 50%;
-    --crt-magenta: 300 100% 50%;
-    --crt-beige: 60 30% 85%;
-    --crt-dark: 0 0% 10%;
-  }
+/* ---- Theme tokens (Tailwind v4) ---- */
+@theme {
+  --color-crt-bg: #0a0d0a;
+  --color-crt-green: #00ff99;
+  --color-crt-amber: #ffcc66;
+  --color-crt-magenta: #ff3df0;
+  --color-crt-scan: rgba(0,0,0,0.25);
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-  }
+  --radius-crt: 20px;
+
+  --font-pixel: "Press Start 2P", monospace;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-@layer base {
-  * {
-    border-color: hsl(var(--border));
-  }
-  body {
-    background-color: white;
-    color: black;
-    font-family: 'VT323', monospace;
-  }
-  
-  @media (prefers-color-scheme: dark) {
-    body {
-      background-color: #111827;
-      color: white;
-    }
-  }
-}
+/* Pixel font */
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
 
-/* CRT Theme Colors */
+/* Root defaults */
 :root {
-  --crt-green: 120 100% 25%;
-  --crt-amber: 45 100% 50%;
-  --crt-magenta: 300 100% 50%;
-  --crt-beige: 60 30% 85%;
-  --crt-dark: 0 0% 10%;
+  color-scheme: dark;
 }
 
-/* CRT Effects */
-.crt-frame {
-  position: relative;
-  border-radius: 20px;
-  padding: 20px;
-  background: linear-gradient(145deg, hsl(var(--crt-dark)), hsl(var(--crt-dark) / 0.8));
-  box-shadow: 
-    inset 0 0 20px rgba(0, 0, 0, 0.5),
-    0 0 30px rgba(0, 0, 0, 0.8);
+/* Base body styling */
+html, body {
+  height: 100%;
+}
+body {
+  @apply bg-[--color-crt-bg] text-[--color-crt-green];
+  font-family: var(--font-mono);
 }
 
-.crt-screen {
+/* ---- CRT wrapper ---- */
+.crt {
   position: relative;
-  border-radius: 10px;
+  border-radius: var(--radius-crt);
+  border: 2px solid rgba(0,255,153,0.35);
+  box-shadow:
+    0 0 0 4px rgba(0, 255, 153, 0.08) inset,
+    0 0 32px rgba(0, 255, 153, 0.2);
   overflow: hidden;
-  background: hsl(var(--crt-green));
+  isolation: isolate;
+  backdrop-filter: blur(0.3px);
 }
 
-.scanlines {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 0, 0, 0.1) 2px,
-    rgba(0, 0, 0, 0.1) 4px
-  );
+/* scanlines overlay */
+.crt::before {
+  content: "";
+  position: absolute; inset: 0;
   pointer-events: none;
-  z-index: 10;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 1px,
+      var(--color-crt-scan) 2px,
+      var(--color-crt-scan) 3px
+    );
+  mix-blend-mode: multiply;
+  opacity: .45;
+  z-index: 2;
 }
 
-.crt-noise {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  opacity: 0.05;
-  animation: noise 0.2s infinite;
+/* subtle glass glare */
+.crt::after {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(120% 60% at 10% 0%, rgba(255,255,255,0.08), transparent 60%),
+    radial-gradient(120% 60% at 90% 100%, rgba(255,255,255,0.05), transparent 60%);
   pointer-events: none;
-  z-index: 11;
+  z-index: 2;
 }
 
-@keyframes noise {
-  0%, 100% { transform: translate(0, 0); }
-  10% { transform: translate(-5%, -5%); }
-  20% { transform: translate(-10%, 5%); }
-  30% { transform: translate(5%, -10%); }
-  40% { transform: translate(-5%, 15%); }
-  50% { transform: translate(-10%, 5%); }
-  60% { transform: translate(15%, 0%); }
-  70% { transform: translate(0%, 10%); }
-  80% { transform: translate(-15%, 0%); }
-  90% { transform: translate(10%, 5%); }
+/* phosphor glow + gentle flicker */
+.crt-glow {
+  text-shadow:
+    0 0 2px var(--color-crt-green),
+    0 0 6px var(--color-crt-green);
+  animation: crt-flicker 3.6s infinite steps(60, end);
 }
 
-.crt-glare {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    135deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.1) 30%,
-    transparent 60%
-  );
-  pointer-events: none;
-  z-index: 12;
+@keyframes crt-flicker {
+  0%, 100% { opacity: 1; }
+  98% { opacity: .98; }
+  99% { opacity: .94; }
 }
 
-/* Pixel Font */
+/* "monitor bezel" container helper */
+.crt-bezel {
+  @apply p-4 sm:p-6 md:p-8 bg-black/40 rounded-[--radius-crt];
+  border: 1px solid rgba(0,255,153,0.2);
+}
+
+/* retro buttons/toggles accents */
+.btn-retro {
+  @apply inline-flex items-center gap-2 rounded-md px-3 py-2 border;
+  border-color: rgba(0,255,153,.35);
+  background: linear-gradient(180deg, rgba(0,255,153,.12), rgba(0,255,153,.02));
+  color: var(--color-crt-amber);
+  text-shadow: 0 0 4px rgba(255,204,102,.4);
+}
+.btn-retro:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 12px rgba(0,255,153,.25);
+}
+
+/* input fields */
+.input-retro {
+  @apply w-full rounded-md px-3 py-2 border outline-none bg-black/40;
+  border-color: rgba(0,255,153,.25);
+  color: var(--color-crt-green);
+}
+.input-retro::placeholder { color: rgba(0,255,153,.55); }
+
+/* slider track color fix for radix/tailwind */
+.radix-slider [data-orientation="horizontal"] > div:nth-child(2) {
+  background-color: rgba(0,255,153,.35);
+}
+.radix-slider [data-orientation="horizontal"] > div:nth-child(3) {
+  background-color: var(--color-crt-magenta);
+}
+
+/* cards/panels */
+.panel {
+  @apply rounded-lg border p-4 sm:p-5 md:p-6 bg-black/30;
+  border-color: rgba(0,255,153,.25);
+  box-shadow: 0 0 18px rgba(0,255,153,.08) inset;
+}
+
+/* headings: pixel font for flavor */
+.h-pixel { font-family: var(--font-pixel); letter-spacing: 0.04em; }
+
+/* utility helpers */
+.text-amber { color: var(--color-crt-amber); }
+.text-magenta { color: var(--color-crt-magenta); }
+.ring-crt { box-shadow: 0 0 0 3px rgba(0,255,153,.35); }
+
+/* Legacy compatibility - keep existing classes */
 .pixel-text {
-  font-family: 'VT323', monospace;
+  font-family: var(--font-pixel);
   font-size: 1.2em;
   letter-spacing: 0.05em;
 }
 
-/* Ugly Button Styles */
 .btn-ugly {
-  background: linear-gradient(45deg, hsl(var(--crt-magenta)), hsl(var(--crt-amber)));
-  border: 2px solid hsl(var(--crt-green));
+  background: linear-gradient(45deg, var(--color-crt-magenta), var(--color-crt-amber));
+  border: 2px solid var(--color-crt-green);
   color: white;
   text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.8);
   box-shadow: 
@@ -212,56 +189,4 @@
   box-shadow: 
     inset 0 0 10px rgba(0, 0, 0, 0.3),
     0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-/* Additional Retro Effects */
-@keyframes glitch {
-  0%, 100% { transform: translate(0); }
-  20% { transform: translate(-2px, 2px); }
-  40% { transform: translate(-2px, -2px); }
-  60% { transform: translate(2px, 2px); }
-  80% { transform: translate(2px, -2px); }
-}
-
-.glitch-effect {
-  animation: glitch 0.3s infinite;
-}
-
-@keyframes scanline {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100vh); }
-}
-
-.scanline-animation {
-  position: absolute;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(to right, transparent, hsl(var(--crt-green)), transparent);
-  animation: scanline 3s linear infinite;
-  opacity: 0.5;
-}
-
-/* Enhanced CRT Frame */
-.crt-frame {
-  position: relative;
-  border-radius: 20px;
-  padding: 20px;
-  background: linear-gradient(145deg, hsl(var(--crt-dark)), hsl(var(--crt-dark) / 0.8));
-  box-shadow: 
-    inset 0 0 20px rgba(0, 0, 0, 0.5),
-    0 0 30px rgba(0, 0, 0, 0.8),
-    0 0 50px rgba(0, 255, 0, 0.1);
-  border: 2px solid hsl(var(--crt-green));
-}
-
-.crt-frame::before {
-  content: '';
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  right: 10px;
-  bottom: 10px;
-  border: 1px solid hsl(var(--crt-green) / 0.3);
-  border-radius: 15px;
-  pointer-events: none;
 }
