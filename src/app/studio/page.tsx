@@ -50,7 +50,7 @@ export default function StudioPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           image: base64Image,
-          prompt: prompt || 'Make this image extremely ugly, distorted, cursed, and intentionally bad. Add pixelation, weird artifacts, color distortion, and make it look like a terrible profile picture from the 90s.',
+                      prompt: prompt || 'Transform this image into an ugly, distorted, and cursed version while keeping the same style and composition. Add pixelation, color distortion, and make it look intentionally terrible.',
           size: '1024x1024'
         }),
       });
@@ -153,7 +153,7 @@ export default function StudioPage() {
               </label>
               <Input
                 type="text"
-                placeholder="Describe how to make it ugly..."
+                placeholder="Describe how to make it ugly while keeping the same style..."
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 className="w-full"

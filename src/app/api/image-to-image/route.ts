@@ -46,9 +46,56 @@ export async function POST(req: NextRequest) {
 
     const openai = getOpenAI();
 
-    // Create a prompt that references the uploaded image without using GPT-4 Vision
-    // This approach uses the user's prompt and adds context about the reference image
-    const enhancedPrompt = `Create an extremely ugly, distorted, and cursed version of the uploaded profile picture. ${prompt}. Make it look intentionally terrible with pixelation, color distortion, weird artifacts, cartoon style, and make it look like the worst profile picture ever. The result should maintain the same basic composition and features as the original but make it look absolutely awful and cursed.`;
+    // First, analyze the image using GPT-4 Vision to understand its characteristics
+    const imageBuffer = Buffer.from(image, 'base64');
+    const imageFile = new File([imageBuffer], 'reference.png', { type: 'image/png' });
+
+    let imageAnalysis = "";
+    try {
+      const analysisResponse = await openai.chat.completions.create({
+        model: "gpt-4-vision-preview",
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Describe this image in detail. Focus on: 1) The style (cartoon, realistic, etc.), 2) The colors and color scheme, 3) The composition and layout, 4) Any distinctive features or characteristics. Keep it concise but specific."
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:image/png;base64,${image}`
+                }
+              }
+            ]
+          }
+        ],
+        max_tokens: 200
+      });
+
+      imageAnalysis = analysisResponse.choices[0]?.message?.content || "";
+    } catch (visionError) {
+      console.log("Vision analysis failed, using fallback approach:", visionError);
+      // Fallback: use a generic approach
+      imageAnalysis = "cartoon style profile picture";
+    }
+
+    // Create a targeted prompt that maintains the original image's characteristics
+    const basePrompt = prompt || "Make this image extremely ugly, distorted, and cursed";
+    
+    const enhancedPrompt = `Transform this exact image into an ugly version while maintaining its original style and composition: ${imageAnalysis}. ${basePrompt}. 
+
+Requirements:
+- Keep the same basic composition and layout as the original
+- Maintain the same art style (cartoon, realistic, etc.)
+- Use similar colors but make them distorted and ugly
+- Add pixelation, glitches, and artifacts
+- Make it look intentionally terrible while still being recognizable as the same image
+- The result should look like a corrupted, cursed version of the original
+
+Style: ${imageAnalysis}
+Original characteristics must be preserved but made ugly.`;
 
     const response = await openai.images.generate({
       model: "dall-e-3",
@@ -71,7 +118,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ 
       success: true, 
       images,
-      prompt: response.data?.[0]?.revised_prompt || enhancedPrompt
+      prompt: response.data?.[0]?.revised_prompt || enhancedPrompt,
+      analysis: imageAnalysis
     });
 
   } catch (error: unknown) {
