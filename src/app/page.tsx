@@ -34,7 +34,7 @@ export default function LandingPage() {
           UGLY AI
         </h1>
         <p className="text-xl mb-8 opacity-80">
-          Create intentionally awful profile pictures
+          Use AI to create intentionally awful profile pictures
         </p>
         
         <Link href="/studio">
@@ -79,7 +79,7 @@ export default function LandingPage() {
           </h2>
           <div className="space-y-4 text-sm">
             <p>1. Upload an image or use our assets</p>
-            <p>2. Apply ugly filters and effects</p>
+            <p>2. AI makes it ugly with advanced effects</p>
             <p>3. Download your cursed creation</p>
           </div>
         </div>
@@ -88,7 +88,7 @@ export default function LandingPage() {
       {/* Simple Footer */}
       <footer className="text-center opacity-60">
         <p className="text-sm">
-          Inspired by the original Ugly Avatar project
+          Powered by OpenAI • Inspired by the original Ugly Avatar project
         </p>
       </footer>
     </div>
